@@ -1,0 +1,370 @@
+﻿@page "/bucket/{bucketId}"
+
+@using System.Text
+@using Microsoft.Extensions.Options
+@using SimpleStore.Admin.Config
+@using SimpleStore.Admin.Models
+@using SimpleStore.Admin.Services.v1
+
+@inject NavigationManager Navigation
+@inject ILogger<Detail> Logger
+@inject SimpleStoreClient Client
+@inject IJSRuntime JsRuntime
+@inject IOptions<ApiConfig> Config
+@inject PersistentComponentState ApplicationState
+
+@attribute [Authorize(Roles = "objectstore")]
+
+@if (Bucket != null)
+{
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <h4>@Bucket!.Name</h4>
+        
+        <div class="d-flex align-items-center">
+            <h4 class="m-0 me-2">
+                @Bucket.StorageSizeMB MB
+                <i class="bi bi-device-hdd ms-1"></i>
+            </h4>
+            <form>
+                <button class="btn btn-primary me-2" type="button" disabled="@IsUploading" onclick="@(async () => await JsRuntime.InvokeVoidAsync("clickElement", "files"))">
+                    @if (IsUploading)
+                    {
+                        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                        <span role="status">Uploading... (@UploadStep/@UploadCount)</span>
+                    }
+                    else
+                    {
+                        <span role="status">
+                            <i class="bi bi-upload me-1"></i>
+                            Upload
+                        </span>
+                    }
+                </button>
+                <InputFile id="files" hidden class="p-0 m-0" multiple OnChange="@UploadFile"/>
+                @if (ShowDeleteButton)
+                {
+                    <button type="button" class="btn btn-danger" @onclick="DeleteSelectionAsync">
+                        <i class="bi bi-list-check"></i>
+                        <span>Delete selection</span>
+                    </button>
+                }
+            </form>
+
+            @if (!ShowDeleteButton)
+            {
+                <button type="button" class="btn btn-danger" @onclick="DeleteBucketAsync">
+                    <i class="bi bi-bucket-fill"></i>
+                    <span class="ms-1">Delete Bucket</span>
+                </button>
+            }
+        </div>
+    </div>
+
+    @if (Messages.Length > 0)
+    {
+        <div class="d-flex flex-row border bg-light w-100 p-3 mb-3">
+            <pre class="m-0">@Messages.ToString()</pre>
+        </div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover table-sm m-0">
+            <thead class="bg-light align-middle">
+            <tr class="align-middle">
+                <th style="width: 3%" class="text-center p-2 bg-light">
+                    <InputCheckbox @bind-Value="AllChecked" @bind-Value:after="@(SelectAll)"/>
+                </th>
+                <th class="p-2 bg-light">Filename</th>
+                <th class="p-2 bg-light">Access Count</th>
+                <th class="p-2 bg-light">Size</th>
+                <th class="p-2 bg-light">Last Access</th>
+                <th class="p-2 bg-light">Created at</th>
+                <th class="p-2 bg-light">Private</th>
+                <th class="p-2 bg-light">As download?</th>
+                <th class="text-center p-2 bg-light" style="width: 5%">Delete</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var file in Bucket.Files)
+            {
+                <tr class="align-middle @(file.Selected || AllChecked ? "bg-selected" : "")">
+                    <td class="text-center">
+                        <input type="checkbox" checked="@file.Selected" onclick="@(() => Select(file.StorageFileId))"/>
+                    </td>
+                    <td class="py-1 align-middle">
+                        <a href="@file.AbsoluteUrl" target="_blank">@file.FileName</a>
+                    </td>
+                    <td class="py-1 align-middle px-2">@file.AccessCount</td>
+                    <td class="py-1 align-middle px-2">@file.FileSizeMB MB</td>
+                    <td class="py-1 align-middle px-2">@file.LastAccess</td>
+                    <td class="py-1 align-middle px-2">@file.CreatedAt</td>
+                    <td class="py-1 align-middle px-2">
+                        <div class="form-check form-switch text-center">
+                            <input class="form-check-input" type="checkbox" onchange="@(() => ChangeVisibility(file))" role="switch" checked="@file.Private">
+                        </div>
+                    </td>
+                    <td class="py-1 align-middle px-2">
+                        <div class="form-check form-switch text-center">
+                            <input class="form-check-input" type="checkbox" onchange="@(async () => { await Client.StorageAsDownloadAsync(file.StorageFileId, !file.AsDownload); file.AsDownload = !file.AsDownload; })" role="switch" checked="@file.AsDownload">
+                        </div>
+                    </td>
+                    <td class="text-center py-1 align-middle">
+                        <button class="btn btn-sm btn-outline-danger" type="button" onclick="@(() => DeleteAsync(file.StorageFileId, file.FileName))">Delete</button>
+                    </td>
+                </tr>
+            }
+            @if (!Bucket.Files.Any())
+            {
+                <tr class="align-middle">
+                    <td colspan="8" class="p-2">Empty</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+}
+
+<style>
+    .bg-selected {
+        background:  #f8d7da;
+    }
+</style>
+
+@code {
+    PersistingComponentStateSubscription persistingSubscription;
+
+    private StringBuilder Messages { get; set; } = new();
+    private int UploadCount { get; set; }
+    private int UploadStep { get; set; }
+    private BucketView? Bucket { get; set; }
+    private string? Endpoint { get; set; }
+    private bool IsUploading { get; set; }
+    private bool AllChecked { get; set; }
+    private bool ShowDeleteButton => AllChecked || (Bucket != null && Bucket.Files.Any(x => x.Selected));
+
+    private const int MaxFileSize = 1024 * 1024 * 1024;
+    private const int MaxFileCount = 1000;
+
+    [Parameter] public string? BucketId { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        persistingSubscription = ApplicationState.RegisterOnPersisting(() =>
+        {
+            ApplicationState.PersistAsJson(nameof(Endpoint), Endpoint);
+            ApplicationState.PersistAsJson(nameof(Bucket), Bucket);
+            return Task.CompletedTask;
+        });
+
+        if (ApplicationState.TryTakeFromJson<string?>(nameof(Endpoint), out var storedEndpoint))
+        {
+            Endpoint = storedEndpoint;
+        }
+        else
+        {
+            Endpoint = Config.Value.Endpoint;
+        }
+
+        if (ApplicationState.TryTakeFromJson<BucketView?>(nameof(Bucket), out var storedBucket))
+        {
+            Bucket = storedBucket;
+        }
+        else
+        {
+            Bucket = await GetAsync();
+        }
+    }
+
+    private async Task<BucketView> GetAsync()
+    {
+        var bucketResponse = await Client.BucketsGetByIdAsync(BucketId);
+
+        return new BucketView
+        {
+            BucketId = bucketResponse.BucketId,
+            CreatedAt = bucketResponse.CreatedAt.ToString("dd.MM.yyyy hh:mm"),
+            LastAccess = bucketResponse.LastAccess.ToString("dd.MM.yyyy hh:mm"),
+            Private = bucketResponse.Private,
+            Name = bucketResponse.Name,
+            AsDownload = bucketResponse.AsDownload,
+            FileCount = bucketResponse.FileCount,
+            Files = bucketResponse.Files.Select(x => new FileView
+            {
+                AbsoluteUrl = x.AbsoluteUrl,
+                FileName = x.FileName,
+                FileSize = x.FileSize,
+                FileSizeMB = x.FileSizeMB,
+                StorageFileId = x.StorageFileId,
+                AccessCount = x.AccessCount,
+                LastAccess = x.LastAccess.ToString("dd.MM.yyyy hh:mm"),
+                CreatedAt = x.CreatedAt.ToString("dd.MM.yyyy hh:mm"),
+                Selected = false,
+                Private = x.Private,
+                AsDownload = x.AsDownload
+            }).ToList()
+        };
+    }
+
+    private async Task DeleteAsync(string fileStorageFileId, string fileName)
+    {
+        try
+        {
+            if (!await JsRuntime.InvokeAsync<bool>("confirm", $"Delete file '{fileName}'?"))
+            {
+                return;
+            }
+
+            await Client.StorageDeleteAsync(fileStorageFileId);
+            Bucket?.Files.RemoveAt(Bucket.Files.FindIndex(x => x.StorageFileId == fileStorageFileId));
+            await InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Messages.AppendLine(ex.Message);
+        }
+    }
+
+    private async Task UploadFile(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            IsUploading = true;
+            Messages.Clear();
+            await InvokeAsync(StateHasChanged);
+
+            var uploadResults = new List<CreateFileDto>();
+            UploadCount = e.FileCount;
+            UploadStep = 0;
+
+            foreach (var file in e.GetMultipleFiles(MaxFileCount))
+            {
+                try
+                {
+                    UploadStep += 1;
+                    // Upload one by one. Actually could be uploaded all in one go, but the NSwag
+                    // client generator messes up the list type.
+                    var fileContent = new StreamContent(file.OpenReadStream(MaxFileSize));
+                    var uploads = new List<FileParameter> { new(await fileContent.ReadAsStreamAsync(), file.Name) };
+
+                    var responses = await Client.StorageSaveFileAsync(BucketId, uploads);
+                    uploadResults.AddRange(responses);
+
+                    foreach (var response in responses)
+                    {
+                        if (response.Success)
+                        {
+                            Bucket?.Files.Add(new FileView
+                            {
+                                AbsoluteUrl = response.BucketFile.Url,
+                                FileName = response.BucketFile.FileName,
+                                FileSizeMB = response.BucketFile.FileSizeMB,
+                                StorageFileId = response.BucketFile.StorageFileId,
+                                AccessCount = response.BucketFile.AccessCount,
+                                LastAccess = response.BucketFile.LastAccess.ToString("dd.MM.yyyy hh:mm"),
+                                CreatedAt = response.BucketFile.CreatedAt.ToString("dd.MM.yyyy hh:mm"),
+                                Selected = false,
+                                FileSize = response.BucketFile.FileSize,
+                                Private = response.BucketFile.Private,
+                            });
+                            Bucket.FileCount += 1;
+                            await InvokeAsync(StateHasChanged);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Messages.AppendLine($"Error for '{file.Name}': {ex.Message}");
+                    Logger.LogError("{FileName} not uploaded (Err: 6): {Message}", file.Name, ex.Message);
+                }
+                finally
+                {
+                    IsUploading = false;
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+
+            foreach (var result in uploadResults.Where(result => !result.Success))
+            {
+                Messages.AppendLine(result.ErrorMessage);
+            }
+        }
+        catch (Exception ex)
+        {
+            Messages.AppendLine(ex.Message);
+        }
+        finally
+        {
+            await InvokeAsync(StateHasChanged);
+            Navigation.Refresh();
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Bucket = await GetAsync();
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async void Select(string fileStorageFileId)
+    {
+        var element = Bucket.Files.Find(x => x.StorageFileId == fileStorageFileId);
+        element.Selected = !element.Selected;
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void SelectAll() => Bucket?.Files.ForEach(x => x.Selected = AllChecked);
+
+    private async Task DeleteSelectionAsync()
+    {
+        var selected = Bucket!.Files.FindAll(x => x.Selected);
+
+        if (!await JsRuntime.InvokeAsync<bool>("confirm", $"Delete selection {selected.Count} selected items?"))
+        {
+            return;
+        }
+
+        foreach (var file in selected)
+        {
+            try
+            {
+                await Client.StorageDeleteAsync(file.StorageFileId);
+                Bucket.Files.Remove(file);
+                Bucket.FileCount -= 1;
+                await InvokeAsync(StateHasChanged);
+            }
+            catch (Exception ex)
+            {
+                Messages.AppendLine(ex.Message);
+            }
+        }
+    }
+
+    private async Task ChangeVisibility(FileView view)
+    {
+        if (view.Private)
+        {
+            await Client.StoragePublicAsync(view.StorageFileId);
+        }
+        else
+        {
+            await Client.StoragePrivateAsync(view.StorageFileId);
+        }
+
+        view.Private = !view.Private;
+    }
+
+    private async Task DeleteBucketAsync()
+    {
+        if (await JsRuntime.InvokeAsync<bool>("confirm", $"Delete bucket '{Bucket!.Name}'?"))
+        {
+            await Client.BucketsDeleteAsync(BucketId);
+            await InvokeAsync(StateHasChanged);
+            Navigation.NavigateTo("/");
+        }
+    }
+
+    private async Task DownloadAsync(string fileStorageFileId, string fileFileName)
+    {
+    }
+
+}

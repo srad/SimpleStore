@@ -1,3 +1,3 @@
 #!/bin/bash
 
-dotnet test ./SimpleObjectStore.Tests --logger "console;verbosity=detailed"
+dotnet test ./SimpleStore.Tests --logger "console;verbosity=detailed"

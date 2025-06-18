@@ -1,7 +1,7 @@
 @echo off
 
-docker build -t sedrad/simpleobjectstore:latest .\SimpleObjectStore
-docker push sedrad/simpleobjectstore
+docker build -t sedrad/simplestore:latest .\SimpleStore
+docker push sedrad/simplestore
 
-docker build -t sedrad/simpleobjectstore-admin:latest .\SimpleObjectStore.Admin
-docker push sedrad/simpleobjectstore-admin
+docker build -t sedrad/simplestore-admin:latest .\SimpleStore.Admin
+docker push sedrad/simplestore-admin

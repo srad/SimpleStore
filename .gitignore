@@ -264,17 +264,17 @@ __pycache__/
 .vscode
 data
 
-SimpleObjectStore.Admin/appsettings.Development.json
-SimpleObjectStore/appsettings.Development.json
+SimpleStore.Admin/appsettings.Development.json
+SimpleStore/appsettings.Development.json
 .env
 keys
 Resources/bin
 .env
 
-SimpleObjectStore.Admin/wwwroot/src/scss/lib/**
-!SimpleObjectStore.Admin/wwwroot/src/scss/lib/empty
-SimpleObjectStore.Admin/wwwroot/fonts/**
-SimpleObjectStore.Admin/node_modules
-SimpleObjectStore.Admin/wwwroot/js
-SimpleObjectStore.Admin/wwwroot/css
+SimpleStore.Admin/wwwroot/src/scss/lib/**
+!SimpleStore.Admin/wwwroot/src/scss/lib/empty
+SimpleStore.Admin/wwwroot/fonts/**
+SimpleStore.Admin/node_modules
+SimpleStore.Admin/wwwroot/js
+SimpleStore.Admin/wwwroot/css
 *.sqlite
