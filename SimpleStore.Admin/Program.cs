@@ -8,15 +8,11 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using SimpleStore.Admin;
-using SimpleStore.Admin.Config;
 using SimpleStore.Admin.Services.v1;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
-
-builder.Services.Configure<OpenIdConfig>(builder.Configuration.GetSection("OpenId"));
-builder.Services.Configure<ApiConfig>(builder.Configuration.GetSection("API"));
 
 builder.Services.Configure<ForwardedHeadersOptions>(options => { options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto; });
 builder.Services.AddHttpContextAccessor();
@@ -29,9 +25,6 @@ builder.Services.AddRazorComponents()
 #if DEBUG
 builder.Services.AddSassCompiler();
 #endif
-
-builder.Services.AddScoped<OpenIdConfig>();
-builder.Services.AddScoped<ApiConfig>();
 
 builder.Services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddTransient<AccessTokenHandler>();
@@ -85,7 +78,7 @@ builder.Services.AddAuthentication(options =>
 
                     return Task.CompletedTask;
                 },
-                
+
                 OnTokenValidated = ctx =>
                 {
                     var logger = ctx.HttpContext.RequestServices

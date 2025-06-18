@@ -1,8 +1,6 @@
 ﻿@page "/bucket/{bucketId}"
 
 @using System.Text
-@using Microsoft.Extensions.Options
-@using SimpleStore.Admin.Config
 @using SimpleStore.Admin.Models
 @using SimpleStore.Admin.Services.v1
 
@@ -10,7 +8,6 @@
 @inject ILogger<Detail> Logger
 @inject SimpleStoreClient Client
 @inject IJSRuntime JsRuntime
-@inject IOptions<ApiConfig> Config
 @inject PersistentComponentState ApplicationState
 
 @attribute [Authorize(Roles = "simplestore")]
@@ -19,7 +16,7 @@
 {
     <div class="d-flex align-items-center justify-content-between mb-3">
         <h4>@Bucket!.Name</h4>
-        
+
         <div class="d-flex align-items-center">
             <h4 class="m-0 me-2">
                 @Bucket.StorageSizeMB MB
@@ -105,7 +102,11 @@
                     </td>
                     <td class="py-1 align-middle px-2">
                         <div class="form-check form-switch text-center">
-                            <input class="form-check-input" type="checkbox" onchange="@(async () => { await Client.StorageAsDownloadAsync(file.StorageFileId, !file.AsDownload); file.AsDownload = !file.AsDownload; })" role="switch" checked="@file.AsDownload">
+                            <input class="form-check-input" type="checkbox" onchange="@(async () =>
+                                                                                      {
+                                                                                          await Client.StorageAsDownloadAsync(file.StorageFileId, !file.AsDownload);
+                                                                                          file.AsDownload = !file.AsDownload;
+                                                                                      })" role="switch" checked="@file.AsDownload">
                         </div>
                     </td>
                     <td class="text-center py-1 align-middle">
@@ -126,7 +127,7 @@
 
 <style>
     .bg-selected {
-        background:  #f8d7da;
+        background: #f8d7da;
     }
 </style>
 
@@ -137,7 +138,6 @@
     private int UploadCount { get; set; }
     private int UploadStep { get; set; }
     private BucketView? Bucket { get; set; }
-    private string? Endpoint { get; set; }
     private bool IsUploading { get; set; }
     private bool AllChecked { get; set; }
     private bool ShowDeleteButton => AllChecked || (Bucket != null && Bucket.Files.Any(x => x.Selected));
@@ -151,19 +151,9 @@
     {
         persistingSubscription = ApplicationState.RegisterOnPersisting(() =>
         {
-            ApplicationState.PersistAsJson(nameof(Endpoint), Endpoint);
             ApplicationState.PersistAsJson(nameof(Bucket), Bucket);
             return Task.CompletedTask;
         });
-
-        if (ApplicationState.TryTakeFromJson<string?>(nameof(Endpoint), out var storedEndpoint))
-        {
-            Endpoint = storedEndpoint;
-        }
-        else
-        {
-            Endpoint = Config.Value.Endpoint;
-        }
 
         if (ApplicationState.TryTakeFromJson<BucketView?>(nameof(Bucket), out var storedBucket))
         {
