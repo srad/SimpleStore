@@ -13,7 +13,7 @@
 @inject IOptions<ApiConfig> Config
 @inject PersistentComponentState ApplicationState
 
-@attribute [Authorize(Roles = "objectstore")]
+@attribute [Authorize(Roles = "simplestore")]
 
 @if (Bucket != null)
 {

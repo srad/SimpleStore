@@ -13,6 +13,8 @@ using SimpleStore.Admin.Services.v1;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+
 builder.Services.Configure<OpenIdConfig>(builder.Configuration.GetSection("OpenId"));
 builder.Services.Configure<ApiConfig>(builder.Configuration.GetSection("API"));
 
@@ -48,60 +50,66 @@ builder.Services.AddAuthentication(options =>
         options.Cookie.Path = "/; SameSite=None";
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     })
-    .AddOpenIdConnect(options =>
-    {
-        var authority = builder.Configuration["OpenId:Authority"];
-        var clientId = builder.Configuration["OpenId:ClientId"];
-        var clientSecret = builder.Configuration["OpenId:ClientSecret"];
-
-        if (authority == null) throw new MissingFieldException("OpenId authority missing");
-        if (clientId == null) throw new MissingFieldException("OpenId client-id missing");
-        if (clientSecret == null) throw new MissingFieldException("OpenId client-secret missing");
-        
-        options.NonceCookie.SecurePolicy = CookieSecurePolicy.Always;
-        options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
-        options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        options.AccessDeniedPath = "/access-denied";
-        options.SignedOutRedirectUri = "/signed-out";
-        options.Authority = authority;
-        options.ClientId = clientId;
-        options.ClientSecret = clientSecret;
-        options.ResponseType = "code";
-        options.SaveTokens = true;
-        options.GetClaimsFromUserInfoEndpoint = true;
-        options.ClaimActions.MapUniqueJsonKey(ClaimsIdentity.DefaultRoleClaimType, "roles");
-        options.UseTokenLifetime = false;
-        options.RequireHttpsMetadata = builder.Environment.IsProduction() && !(builder.Configuration["DisableHttpsMetadata"] != null && builder.Configuration["DisableHttpsMetadata"] == "true");
-        options.Scope.Clear();
-        options.Scope.Add("openid");
-        options.Scope.Add("email");
-        options.Scope.Add("profile");
-        options.TokenValidationParameters = new TokenValidationParameters { NameClaimType = "name", RoleClaimType = ClaimTypes.Role };
-
-        options.Events = new OpenIdConnectEvents
+    .AddKeycloakOpenIdConnect(
+        serviceName: "keycloak",
+        realm: builder.Configuration["Authentication:OpenIdConnect:Realm"] ?? throw new InvalidOperationException("No Realm configured"),
+        options =>
         {
-            OnAuthenticationFailed = ctx =>
+            options.NonceCookie.SecurePolicy = CookieSecurePolicy.Always;
+            options.CorrelationCookie.SecurePolicy = CookieSecurePolicy.Always;
+            options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            options.AccessDeniedPath = "/access-denied";
+            options.SignedOutRedirectUri = "/signed-out";
+            options.ClientId = builder.Configuration["Authentication:OpenIdConnect:ClientId"];
+            options.ClientSecret = builder.Configuration["Authentication:OpenIdConnect:ClientSecret"];
+            options.ResponseType = "code";
+            options.SaveTokens = true;
+
+            options.GetClaimsFromUserInfoEndpoint = true;
+            options.ClaimActions.MapUniqueJsonKey(ClaimsIdentity.DefaultRoleClaimType, "roles");
+            options.UseTokenLifetime = false;
+            options.RequireHttpsMetadata = builder.Environment.IsProduction() && !(builder.Configuration["DisableHttpsMetadata"] != null && builder.Configuration["DisableHttpsMetadata"] == "true");
+            options.Scope.Clear();
+            options.Scope.Add("openid");
+            options.Scope.Add("email");
+            options.Scope.Add("profile");
+            options.Scope.Add("roles");
+            options.TokenValidationParameters = new TokenValidationParameters { NameClaimType = "name", RoleClaimType = ClaimTypes.Role };
+
+            options.Events = new OpenIdConnectEvents
             {
-                ctx.HandleResponse(); // Suppress the exception.
-                ctx.Response.Redirect($"/error?error={Uri.EscapeDataString(ctx.Exception.Message[..Math.Min(1024, ctx.Exception.Message.Length)])}");
+                OnAuthenticationFailed = ctx =>
+                {
+                    ctx.HandleResponse(); // Suppress the exception.
+                    ctx.Response.Redirect($"/error?error={Uri.EscapeDataString(ctx.Exception.Message[..Math.Min(1024, ctx.Exception.Message.Length)])}");
 
-                return Task.CompletedTask;
-            },
+                    return Task.CompletedTask;
+                },
+                
+                OnTokenValidated = ctx =>
+                {
+                    var logger = ctx.HttpContext.RequestServices
+                        .GetRequiredService<ILogger<Program>>();
 
-            OnRemoteFailure = ctx =>
-            {
-                ctx.Response.Redirect("/error");
-                ctx.HandleResponse();
+                    foreach (var c in ctx.Principal!.Claims)
+                        logger.LogInformation("CLAIM {Type} = {Value}", c.Type, c.Value);
 
-                return Task.CompletedTask;
-            },
-        };
-    });
+                    return Task.CompletedTask;
+                },
+
+                OnRemoteFailure = ctx =>
+                {
+                    ctx.Response.Redirect("/error");
+                    ctx.HandleResponse();
+
+                    return Task.CompletedTask;
+                },
+            };
+        });
 
 builder.Services.AddHttpClient("api", client =>
 {
-    var endpoint = builder.Configuration["API:Endpoint"];
-    var key = builder.Configuration["API:Key"];
+    var key = builder.Configuration["apikey"];
 
     // If the application wants to use an API key, add it to the http client's header.
     if (key != null)
@@ -109,22 +117,23 @@ builder.Services.AddHttpClient("api", client =>
         client.DefaultRequestHeaders.Add("X-API-Key", key);
     }
 
-    client.BaseAddress = new Uri(endpoint ?? throw new MissingMemberException("missing endpoint"));
+    client.BaseAddress = new Uri("https+http://api");
     client.Timeout = TimeSpan.FromMinutes(30);
 }).AddHttpMessageHandler<AccessTokenHandler>();
 
 builder.Services.AddScoped<SimpleStoreClient>(x =>
 {
     var factory = x.GetRequiredService<IHttpClientFactory>();
-    var endpoint = builder.Configuration["API:Endpoint"] ?? throw new MissingMemberException("missing endpoint");
     var httpClient = factory.CreateClient("api");
 
-    return new SimpleStoreClient(endpoint, httpClient);
+    return new SimpleStoreClient("https+http://api", httpClient);
 });
 
 builder.Services.Configure<ForwardedHeadersOptions>(options => { options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto; });
 
 var app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 app.Use((context, next) =>
 {

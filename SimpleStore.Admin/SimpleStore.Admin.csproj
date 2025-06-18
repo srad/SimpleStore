@@ -15,6 +15,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Aspire.Keycloak.Authentication" Version="9.3.1-preview.1.25305.6" />
         <PackageReference Include="AspNetCore.SassCompiler" Version="1.89.2" />
         <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.8.3">
             <PrivateAssets>all</PrivateAssets>
@@ -48,6 +49,10 @@
 
     <ItemGroup>
       <None Include="appsettings.Development.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\SimpleStore.ServiceDefaults\SimpleStore.ServiceDefaults.csproj" />
     </ItemGroup>
 
     <Target Name="CopyFiles" AfterTargets="Compile">

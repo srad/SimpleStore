@@ -15,6 +15,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Aspire.Keycloak.Authentication" Version="9.3.1-preview.1.25305.6" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.6" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.6" />
         <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.6" />
@@ -39,8 +40,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <_ContentIncludedByDefault Remove="storage\cf3bd6e4-80ec-4f0e-98b0-a859da84afbb\265e5e70-c72b-4a15-be4d-ef05967b884c.json"/>
-        <_ContentIncludedByDefault Remove="storage\cf3bd6e4-80ec-4f0e-98b0-a859da84afbb\products-1686125701330.json"/>
+        <_ContentIncludedByDefault Remove="storage\cf3bd6e4-80ec-4f0e-98b0-a859da84afbb\265e5e70-c72b-4a15-be4d-ef05967b884c.json" />
+        <_ContentIncludedByDefault Remove="storage\cf3bd6e4-80ec-4f0e-98b0-a859da84afbb\products-1686125701330.json" />
     </ItemGroup>
 
     <ItemGroup>
@@ -49,5 +50,9 @@
 
     <ItemGroup>
       <None Include="appsettings.Development.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\SimpleStore.ServiceDefaults\SimpleStore.ServiceDefaults.csproj" />
     </ItemGroup>
 </Project>

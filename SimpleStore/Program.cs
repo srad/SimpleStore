@@ -1,18 +1,15 @@
-using System.Security.Claims;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using SimpleStore.Auth;
 using SimpleStore.Helpers;
 using SimpleStore.Helpers.Interfaces;
 using SimpleStore.Http;
 using SimpleStore.Models;
-using SimpleStore.Models.Configs;
 using SimpleStore.Seeds;
 using SimpleStore.Services;
 using SimpleStore.Services.Interfaces;
@@ -53,56 +50,33 @@ Console.WriteLine($"Storage directory: {storageDirectory}");
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.AddServiceDefaults();
+
 builder.Services.AddHttpContextAccessor();
 
 builder.Services
-    .AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddApiKeySupport(options => {})
-    .AddJwtBearer(options =>
-    {
-        var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtConfig>();
-
-        options.Authority = jwtSettings!.Authority;
-        options.RequireHttpsMetadata = builder.Environment.IsProduction();
-        options.Audience = "account";
-        options.IncludeErrorDetails = !builder.Environment.IsProduction();
-
-        options.Events = new JwtBearerEvents
+    .AddAuthentication()
+    .AddApiKeySupport(options => { })
+    .AddKeycloakJwtBearer(
+        serviceName: "keycloak",
+        realm: builder.Configuration["Realm"] ?? throw new InvalidOperationException("Realm not configured"),
+        options =>
         {
-            OnAuthenticationFailed = context =>
-            {
-                return Task.CompletedTask;
-            },
-        };
-
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            NameClaimType = "name",
-            RoleClaimType = ClaimTypes.Role,
-            ValidateAudience = false,
-            ValidateLifetime = false
-        };
-        
-        options.MetadataAddress = jwtSettings.MetadataAddress;
-    });
+            options.RequireHttpsMetadata = builder.Environment.IsProduction();
+            options.Audience = "account";
+            options.IncludeErrorDetails = !builder.Environment.IsProduction();
+        });
 
 builder.Services.AddAuthorization(options =>
 {
     var defaultAuthorizationPolicyBuilder = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme, ApiKeyAuthenticationOptions.DefaultScheme);
     defaultAuthorizationPolicyBuilder = defaultAuthorizationPolicyBuilder
         .RequireAuthenticatedUser()
-        .RequireRole("objectstore");
+        .RequireRole("simplestore");
     options.DefaultPolicy = defaultAuthorizationPolicyBuilder.Build();
 });
 
-builder.Services.AddDbContextFactory<ApplicationDbContext>(options =>
-{
-    options.UseSqlite($"Data Source={Environment.GetEnvironmentVariable("DB_PATH")}");
-});
+builder.Services.AddDbContextFactory<ApplicationDbContext>(options => { options.UseSqlite($"Data Source={Environment.GetEnvironmentVariable("DB_PATH")}"); });
 builder.Services.AddScoped<IApiKeysService, ApiKeysService>();
 //builder.Services.AddScoped<IAuthorizationFilter, ApiAuthorizationFilter>();
 //builder.Services.AddScoped<IApiKeyValidator, ApiKeyValidator>();
@@ -129,6 +103,8 @@ builder.Services.AddSwaggerGen(o =>
 builder.Services.AddOutputCache(options => { options.AddBasePolicy(b => b.Cache()); });
 
 var app = builder.Build();
+
+app.MapDefaultEndpoints();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

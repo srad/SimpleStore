@@ -74,7 +74,9 @@ public class ApiKeyAuthenticationHandler(
     protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
     {
         //Create response
-        Response.Headers.Append(HeaderNames.WWWAuthenticate, $@"Authorization realm=""{ApiKeyAuthenticationOptions.DefaultScheme}""");
+        Response.Headers.Append(HeaderNames.WWWAuthenticate, $"""
+                                                              Authorization realm="{ApiKeyAuthenticationOptions.DefaultScheme}"
+                                                              """);
         Response.StatusCode = StatusCodes.Status401Unauthorized;
         Response.ContentType = MediaTypeNames.Application.Json;
 
