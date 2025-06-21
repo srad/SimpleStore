@@ -2,9 +2,9 @@ using Projects;
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var username = builder.AddParameter("username");
-var password = builder.AddParameter("password", secret: true);
-var clientSecret = builder.AddParameter("clientsecret", secret: true);
+var username = builder.AddParameter("keycloak-username");
+var password = builder.AddParameter("keycloak-password", secret: true);
+var clientSecret = builder.AddParameter("client-secret", secret: true);
 
 var keycloak = builder.AddKeycloak("keycloak", adminUsername: username, adminPassword: password)
     .WithDataVolume()
