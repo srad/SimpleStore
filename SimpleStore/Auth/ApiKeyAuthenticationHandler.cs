@@ -145,7 +145,7 @@ public class ApiKeyAuthenticationHandler(
 
     private async Task<ApiKey> ApiKeyCheckAsync(string apiKey)
     {
-        var ctx = await factory.CreateDbContextAsync();
+        await using var ctx = await factory.CreateDbContextAsync();
         return await ctx.ApiKeys.FirstOrDefaultAsync(x => x.Key == apiKey);
     }
 

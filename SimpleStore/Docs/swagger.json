@@ -1,0 +1,854 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "SimpleStore API",
+    "version": "v1"
+  },
+  "paths": {
+    "/api/v1/AllowedHosts": {
+      "get": {
+        "tags": [
+          "AllowedHosts"
+        ],
+        "operationId": "AllowedHostsGet",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AllowedHost"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/AllowedHosts/{host}": {
+      "delete": {
+        "tags": [
+          "AllowedHosts"
+        ],
+        "operationId": "AllowedHostsDelete",
+        "parameters": [
+          {
+            "name": "host",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "AllowedHosts"
+        ],
+        "operationId": "AllowedHostsCreate",
+        "parameters": [
+          {
+            "name": "host",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AllowedHost"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ApiKeys": {
+      "get": {
+        "tags": [
+          "ApiKeys"
+        ],
+        "operationId": "ApiKeysGet",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApiKey"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "ApiKeys"
+        ],
+        "operationId": "ApiKeysDelete",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "ApiKeys"
+        ],
+        "operationId": "ApiKeysCreate",
+        "parameters": [
+          {
+            "name": "title",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiKey"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Buckets": {
+      "get": {
+        "tags": [
+          "Buckets"
+        ],
+        "operationId": "BucketsGet",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BucketViewDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Buckets"
+        ],
+        "operationId": "BucketsAsDownload",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "asDownload",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/Buckets/{name}/name": {
+      "get": {
+        "tags": [
+          "Buckets"
+        ],
+        "operationId": "BucketsGetByName",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BucketViewDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Buckets/{id}/id": {
+      "get": {
+        "tags": [
+          "Buckets"
+        ],
+        "operationId": "BucketsGetById",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BucketViewDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Buckets/exists/{name}": {
+      "get": {
+        "tags": [
+          "Buckets"
+        ],
+        "operationId": "BucketsExists",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Buckets/{name}": {
+      "post": {
+        "tags": [
+          "Buckets"
+        ],
+        "operationId": "BucketsCreate",
+        "parameters": [
+          {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BucketViewDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Buckets/{id}": {
+      "delete": {
+        "tags": [
+          "Buckets"
+        ],
+        "operationId": "BucketsDelete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/Storage": {
+      "get": {
+        "tags": [
+          "Storage"
+        ],
+        "operationId": "StorageGetFiles",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BucketFile"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Storage"
+        ],
+        "operationId": "StorageAsDownload",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "asDownload",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/Storage/{id}": {
+      "get": {
+        "tags": [
+          "Storage"
+        ],
+        "operationId": "StorageGetFile",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BucketFile"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Storage"
+        ],
+        "operationId": "StorageDelete",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/Storage/exists/{bucketId}/{fileName}": {
+      "get": {
+        "tags": [
+          "Storage"
+        ],
+        "operationId": "StorageExists",
+        "parameters": [
+          {
+            "name": "bucketId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fileName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Storage/{bucketId}": {
+      "post": {
+        "tags": [
+          "Storage"
+        ],
+        "operationId": "StorageSaveFile",
+        "parameters": [
+          {
+            "name": "bucketId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "files": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                }
+              },
+              "encoding": {
+                "files": {
+                  "style": "form"
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CreateFileDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/Storage/private": {
+      "post": {
+        "tags": [
+          "Storage"
+        ],
+        "operationId": "StoragePrivate",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/Storage/public": {
+      "post": {
+        "tags": [
+          "Storage"
+        ],
+        "operationId": "StoragePublic",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/Storage/storage_info": {
+      "get": {
+        "tags": [
+          "Storage"
+        ],
+        "operationId": "StorageGetInfo",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StorageInfoDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AllowedHost": {
+        "type": "object",
+        "properties": {
+          "hostname": {
+            "maxLength": 2048,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ApiKey": {
+        "required": [
+          "accessTimeLimited",
+          "createdAt",
+          "title"
+        ],
+        "type": "object",
+        "properties": {
+          "key": {
+            "maxLength": 36,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "title": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "accessTimeLimited": {
+            "type": "boolean"
+          },
+          "validUntil": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "BucketFile": {
+        "required": [
+          "accessCount",
+          "asDownload",
+          "createdAt",
+          "fileName",
+          "filePath",
+          "fileSize",
+          "fileSizeMB",
+          "lastAccess",
+          "private",
+          "storedFileName",
+          "url"
+        ],
+        "type": "object",
+        "properties": {
+          "storageFileId": {
+            "maxLength": 36,
+            "minLength": 0,
+            "type": "string",
+            "nullable": true
+          },
+          "fileName": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "type": "string"
+          },
+          "storedFileName": {
+            "maxLength": 1024,
+            "minLength": 0,
+            "type": "string"
+          },
+          "filePath": {
+            "maxLength": 2048,
+            "minLength": 0,
+            "type": "string"
+          },
+          "url": {
+            "maxLength": 2048,
+            "minLength": 0,
+            "type": "string"
+          },
+          "fileSize": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "fileSizeMB": {
+            "minLength": 1,
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "accessCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "private": {
+            "type": "boolean"
+          },
+          "lastAccess": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "asDownload": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "BucketViewDto": {
+        "type": "object",
+        "properties": {
+          "bucketId": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "directoryName": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastAccess": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fileCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "private": {
+            "type": "boolean"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FileViewDto"
+            },
+            "nullable": true
+          },
+          "asDownload": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CreateFileDto": {
+        "type": "object",
+        "properties": {
+          "bucketFile": {
+            "$ref": "#/components/schemas/BucketFile"
+          },
+          "success": {
+            "type": "boolean"
+          },
+          "errorMessage": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "FileViewDto": {
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "type": "string",
+            "nullable": true
+          },
+          "relativeUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "absoluteUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "fileSizeMB": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastAccess": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "private": {
+            "type": "boolean"
+          },
+          "storageFileId": {
+            "type": "string",
+            "nullable": true
+          },
+          "fileSize": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "accessCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "asDownload": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false
+      },
+      "StorageInfoDto": {
+        "type": "object",
+        "properties": {
+          "freeGB": {
+            "type": "number",
+            "format": "float"
+          },
+          "sizeGB": {
+            "type": "number",
+            "format": "float"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "availablePercent": {
+            "type": "number",
+            "format": "float"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

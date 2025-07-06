@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SimpleStore.Models;
 
@@ -10,9 +11,11 @@ using SimpleStore.Models;
 namespace SimpleStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250706114552_AddCascadeDeleteToBuckets")]
+    partial class AddCascadeDeleteToBuckets
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.6");
@@ -68,9 +71,6 @@ namespace SimpleStore.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT COLLATE NOCASE");
 
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
                     b.Property<DateTimeOffset>("LastAccess")
                         .HasColumnType("TEXT");
 
@@ -85,8 +85,6 @@ namespace SimpleStore.Migrations
 
                     b.HasIndex("DirectoryName")
                         .IsUnique();
-
-                    b.HasIndex("IsDeleted");
 
                     b.HasIndex("Name")
                         .IsUnique();

@@ -1,9 +1,9 @@
-﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
-FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 
 ARG TARGETARCH
 
@@ -14,11 +14,12 @@ WORKDIR "/src/SimpleStore.Admin"
 COPY . .
 
 RUN apt update
-RUN apt install nodejs -y
+RUN apt install nodejs npm -y
 
-RUN chmod +x clone.sh
-RUN ./clone.sh
+WORKDIR "/src/SimpleStore.Admin/wwwroot"
+RUN npm install
 
+WORKDIR "/src/SimpleStore.Admin"
 RUN dotnet build "SimpleStore.Admin.csproj" -c Release -o /app/build -a $TARGETARCH
 
 FROM build AS publish

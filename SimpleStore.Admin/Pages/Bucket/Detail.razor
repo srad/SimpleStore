@@ -69,7 +69,7 @@
             <thead class="bg-light align-middle">
             <tr class="align-middle">
                 <th style="width: 3%" class="text-center p-2 bg-light">
-                    <InputCheckbox @bind-Value="AllChecked" @bind-Value:after="@(SelectAll)"/>
+                    <InputCheckbox disabled="@(!Bucket?.Files.Any())" @bind-Value="AllChecked" @bind-Value:after="@(SelectAll)"/>
                 </th>
                 <th class="p-2 bg-light">Filename</th>
                 <th class="p-2 bg-light">Access Count</th>
@@ -117,7 +117,7 @@
             @if (!Bucket.Files.Any())
             {
                 <tr class="align-middle">
-                    <td colspan="8" class="p-2">Empty</td>
+                    <td colspan="9" class="p-2">Empty</td>
                 </tr>
             }
             </tbody>
@@ -320,6 +320,7 @@
                 await Client.StorageDeleteAsync(file.StorageFileId);
                 Bucket.Files.Remove(file);
                 Bucket.FileCount -= 1;
+                AllChecked = false;
                 await InvokeAsync(StateHasChanged);
             }
             catch (Exception ex)

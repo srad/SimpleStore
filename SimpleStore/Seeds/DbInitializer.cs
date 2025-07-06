@@ -12,7 +12,12 @@ internal static class DbInitializer
     {
         ArgumentNullException.ThrowIfNull(dbContext, nameof(dbContext));
         //await dbContext.Database.EnsureCreatedAsync();
-        await dbContext.Database.MigrateAsync();
+        await dbContext.Database.CreateExecutionStrategy().ExecuteAsync(async () =>
+        {
+            await using var transaction = await dbContext.Database.BeginTransactionAsync();
+            await dbContext.Database.MigrateAsync();
+            await transaction.CommitAsync();
+        });
         await CreateApiKey(dbContext, service);
         await ImportFilesFromStorage(dbContext, slug);
         await DeleteOrphans(dbContext);

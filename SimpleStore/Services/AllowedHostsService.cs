@@ -8,7 +8,7 @@ public class AllowedHostsService(IDbContextFactory<ApplicationDbContext> factory
 {
     public async Task DeleteAsync(string host)
     {
-        var context = await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
         
         if (await context.AllowedHosts.CountAsync() == 1)
         {
@@ -20,7 +20,7 @@ public class AllowedHostsService(IDbContextFactory<ApplicationDbContext> factory
     
     public async Task<IReadOnlyList<AllowedHost>> ToListAsync()
     {
-        var context = await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
         
         return await context.AllowedHosts.ToListAsync();
     }
@@ -40,7 +40,7 @@ public class AllowedHostsService(IDbContextFactory<ApplicationDbContext> factory
             throw new Exception($"The hostname '{host}' is invalid");
         }
         
-        var context = await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
 
         if (await context.AllowedHosts.AnyAsync(x => x.Hostname == host))
         {

@@ -6,23 +6,23 @@ using SimpleStore.Services.Interfaces;
 
 namespace SimpleStore.Services;
 
-public class StorageService(IDbContextFactory<ApplicationDbContext> factory, ISlug slug, ILogger<StorageService> logger, IHttpContextAccessor _httpContextAccessor) : IStorageService<string>
+public class StorageService(IDbContextFactory<ApplicationDbContext> factory, ISlug slug, ILogger<StorageService> logger, IHttpContextAccessor httpContextAccessor) : IStorageService<string>
 {
     private readonly string _storagePath = Environment.GetEnvironmentVariable("STORAGE_DIRECTORY") ?? throw new ArgumentNullException();
     private string BucketPath(string directoryName) => Path.Combine(_storagePath, directoryName);
 
-    private readonly string _url = $"{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}{_httpContextAccessor.HttpContext.Request.PathBase}";
+    private readonly string _url = $"{httpContextAccessor.HttpContext.Request.Scheme}://{httpContextAccessor.HttpContext.Request.Host}{httpContextAccessor.HttpContext.Request.PathBase}";
 
     public async Task<IReadOnlyList<BucketFile>> ToListAsync()
     {
-        var context = await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
 
         return await context.BucketFiles.AsNoTracking().ToListAsync();
     }
 
     public async Task<BucketFile> FindByIdAsync(string id)
     {
-        var context = await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
 
         var storageFile = await context.BucketFiles.FindAsync(id);
 
@@ -45,14 +45,14 @@ public class StorageService(IDbContextFactory<ApplicationDbContext> factory, ISl
     /// <returns></returns>
     public async Task<bool> ExistsAsync(string bucketId, string fileName)
     {
-        var context = await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
 
         return await context.BucketFiles.AnyAsync(x => x.BucketId == bucketId && x.StoredFileName == slug.Generate(fileName));
     }
 
     public async Task<IReadOnlyList<CreateFileDto>> SaveAsync(string bucketId, List<IFormFile> files)
     {
-        var context = await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
 
         var bucket = await context.Buckets
             .AsNoTracking()
@@ -134,7 +134,7 @@ public class StorageService(IDbContextFactory<ApplicationDbContext> factory, ISl
 
     public async Task DeleteAsync(string id)
     {
-        var context = await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
 
         var storageFile = await context.BucketFiles.FindAsync(id);
         if (storageFile == null)
@@ -156,18 +156,18 @@ public class StorageService(IDbContextFactory<ApplicationDbContext> factory, ISl
         }
     }
 
-    public async Task PrivateAsync(string id)
+    public async Task MakePrivateAsync(string id)
     {
-        var context = await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
 
         await context.BucketFiles
             .Where(x => x.StorageFileId == id)
             .ExecuteUpdateAsync(x => x.SetProperty(p => p.Private, true));
     }
 
-    public async Task PublicAsync(string id)
+    public async Task MakePublicAsync(string id)
     {
-        var context = await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
 
         await context.BucketFiles
             .Where(x => x.StorageFileId == id)
@@ -191,7 +191,7 @@ public class StorageService(IDbContextFactory<ApplicationDbContext> factory, ISl
 
     public async Task AsDownloadAsync(string id, bool download)
     {
-        var context = await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
 
         await context.BucketFiles
             .Where(x => x.StorageFileId == id)

@@ -11,8 +11,8 @@ public interface IStorageService<in T>
     Task<bool> ExistsAsync(string bucketId, string fileName);
     Task<IReadOnlyList<CreateFileDto>> SaveAsync(string bucketId, List<IFormFile> files);
     Task DeleteAsync(T id);
-    Task PrivateAsync(T id);
-    Task PublicAsync(T id);
+    Task MakePrivateAsync(T id);
+    Task MakePublicAsync(T id);
     StorageInfoDto GetStorageStatsAsync();
     Task AsDownloadAsync(string id, bool download);
 }

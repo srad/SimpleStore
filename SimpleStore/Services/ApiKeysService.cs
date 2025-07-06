@@ -8,7 +8,7 @@ public class ApiKeysService(IDbContextFactory<ApplicationDbContext> factory, IKe
 {
     public async Task<IReadOnlyList<ApiKey>> ToListAsync()
     {
-        var context = await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
         
         return await context.ApiKeys.ToListAsync();
     }
@@ -20,7 +20,7 @@ public class ApiKeysService(IDbContextFactory<ApplicationDbContext> factory, IKe
             Key = keyService.GenerateKey(), Title = title, CreatedAt = DateTimeOffset.UtcNow, AccessTimeLimited = false
         };
         
-        var context = await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
         await context.ApiKeys.AddAsync(key);
         await context.SaveChangesAsync();
 
@@ -29,7 +29,7 @@ public class ApiKeysService(IDbContextFactory<ApplicationDbContext> factory, IKe
     
     public async Task DeleteAsync(string key)
     {
-        var context = await factory.CreateDbContextAsync();
+        await using var context = await factory.CreateDbContextAsync();
         
         if (await context.ApiKeys.CountAsync() == 1)
         {

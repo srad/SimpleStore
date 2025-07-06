@@ -1,8 +1,6 @@
-﻿version: '3.9'
+﻿services:
 
-services:
-
-  simple-object-store:
+  simple-store:
     container_name: simple-object-store
     #image: sedrad/simplestore:latest
     build:
@@ -13,9 +11,11 @@ services:
     ports:
       - '5000:80'
 
-  simple-object-store-ui:
+  simple-store-ui:
     container_name: simple-store-admin
     #image: sedrad/simplestore-admin:latest
+    depends_on:
+      - simple-store
     volumes:
       - ./keys:/root/.aspnet/DataProtection-Keys
     build:

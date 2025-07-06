@@ -1,17 +1,22 @@
 using Microsoft.EntityFrameworkCore;
-using SimpleStore.Seeds;
-using SimpleStore.Services;
 
 namespace SimpleStore.Models;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {
     public DbSet<ApiKey> ApiKeys { get; set; }
     public DbSet<BucketFile> BucketFiles { get; set; }
     public DbSet<Bucket> Buckets { get; set; }
     public DbSet<AllowedHost> AllowedHosts { get; set; }
 
-    public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Bucket>()
+            .HasMany(b => b.Files)
+            .WithOne(f => f.Bucket)
+            .HasForeignKey(f => f.BucketId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

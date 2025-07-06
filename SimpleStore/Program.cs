@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.OpenApi;
+using Microsoft.OpenApi.Extensions;
 using Microsoft.OpenApi.Models;
 using SimpleStore.Auth;
 using SimpleStore.Helpers;
@@ -13,6 +15,8 @@ using SimpleStore.Models;
 using SimpleStore.Seeds;
 using SimpleStore.Services;
 using SimpleStore.Services.Interfaces;
+using Swashbuckle.AspNetCore.Swagger;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 // Handle data folders and paths.
 
@@ -109,6 +113,35 @@ app.MapDefaultEndpoints();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
+    app.Lifetime.ApplicationStarted.Register(() =>
+    {
+        // Optional: create a scope in case you need scoped services later
+        using var scope = app.Services.CreateScope();
+
+        var swaggerProvider = scope.ServiceProvider
+            .GetRequiredService<ISwaggerProvider>();
+
+        // The version string must match the one you registered with SwaggerDoc(...)
+        var openApiDocument = swaggerProvider.GetSwagger("v1");
+
+        // Convert the document to JSON (you can use OpenApiSpecVersion.OpenApi2_0
+        // and/or OpenApiFormat.Yaml if you prefer)
+        var json = openApiDocument.Serialize(
+            OpenApiSpecVersion.OpenApi3_0,
+            OpenApiFormat.Json);
+
+        var outputPath = Path.Combine(
+            "Docs",
+            "swagger.json");
+
+        // Ensure the directory exists
+        Directory.CreateDirectory(Path.GetDirectoryName(outputPath)!);
+
+        File.WriteAllText(outputPath, json);
+
+        Console.WriteLine($"OpenAPI specification written to: {outputPath}");
+    });
+
     app.UseSwagger();
     app.UseSwaggerUI();
     IdentityModelEventSource.ShowPII = true;

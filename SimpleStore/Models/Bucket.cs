@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SimpleStore.Models;
 
-[Index(nameof(Name), IsUnique = true), Index(nameof(DirectoryName), IsUnique = true)]
+[Index(nameof(Name), IsUnique = true), Index(nameof(DirectoryName), IsUnique = true), Index(nameof(IsDeleted))]
 public class Bucket
 {
     [Key, StringLength(36), Column(TypeName = "TEXT COLLATE NOCASE")] public string BucketId { get; set; }
@@ -15,6 +15,7 @@ public class Bucket
     [NotMapped] public int Size { get; set; }
     [Required] public bool Private { get; set; }
     [Required] public bool AsDownload { get; set; }
+    [Required] public bool IsDeleted { get; set; }
 
     public ICollection<BucketFile> Files { get; set; }
-}
+} 

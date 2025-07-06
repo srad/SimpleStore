@@ -10,7 +10,6 @@
 
     <ItemGroup>
         <Folder Include="Services\v1\" />
-        <Folder Include="wwwroot\css\" />
         <Folder Include="wwwroot\img\" />
     </ItemGroup>
 
@@ -37,14 +36,6 @@
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
         </Content>
-        <Content Update="clone.bat">
-          <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-          <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-        </Content>
-        <Content Update="clone.sh">
-          <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-          <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-        </Content>
     </ItemGroup>
 
     <ItemGroup>
@@ -55,9 +46,14 @@
       <ProjectReference Include="..\SimpleStore.ServiceDefaults\SimpleStore.ServiceDefaults.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="wwwroot\fonts\bootstrap-icons.woff" />
+      <_ContentIncludedByDefault Remove="wwwroot\fonts\bootstrap-icons.woff2" />
+    </ItemGroup>
+
     <Target Name="CopyFiles" AfterTargets="Compile">
         <ItemGroup>
-            <FontFiles Include=".\wwwroot\src\scss\lib\icons\font\fonts\**" />
+            <FontFiles Include=".\wwwroot\node_modules\bootstrap-icons\font\fonts\**" />
             <BootstrapJs Include=".\wwwroot\src\scss\lib\bootstrap\dist\js\**" />
         </ItemGroup>
 

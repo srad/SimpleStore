@@ -1,7 +1,4 @@
-﻿@import "../bootstrap";
-
-$bootstrap-icons-font-dir: "/fonts" !default;
-@import "../lib/icons/font/bootstrap-icons";
+﻿@use "../bootstrap";
 
 html, body {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;

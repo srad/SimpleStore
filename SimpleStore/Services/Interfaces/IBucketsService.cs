@@ -12,4 +12,5 @@ public interface IBucketsService
     Task DeleteAsync(string id);
     Task<bool> ExistsAsync(string name);
     Task AsDownloadAsync(string id, bool download);
+    Task SoftDeleteAsync(string id);
 }

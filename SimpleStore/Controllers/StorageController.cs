@@ -26,10 +26,10 @@ public class StorageController(IStorageService<string> service) : ControllerBase
     public Task DeleteAsync(string id) => service.DeleteAsync(id);
 
     [HttpPost("private")]
-    public Task PrivateAsync(string id) => service.PrivateAsync(id);
+    public Task PrivateAsync(string id) => service.MakePrivateAsync(id);
 
     [HttpPost("public")]
-    public Task PublicAsync(string id) => service.PublicAsync(id);
+    public Task PublicAsync(string id) => service.MakePublicAsync(id);
 
     [HttpGet("storage_info")]
     public StorageInfoDto GetInfoAsync() => service.GetStorageStatsAsync();

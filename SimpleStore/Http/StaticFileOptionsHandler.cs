@@ -14,7 +14,7 @@ public static class StaticFileOptionsHandler
     {
         using var scope = app.Services.CreateScope();
         var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<ApplicationDbContext>>();
-        var dbContext = await factory.CreateDbContextAsync();
+        await using var dbContext = await factory.CreateDbContextAsync();
         
         if (!await dbContext.AllowedHosts.AnyAsync(x => x.Hostname == "*" || x.Hostname == ctx.Context.Request.Host.ToString()))
         {
