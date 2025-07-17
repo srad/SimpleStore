@@ -35,11 +35,17 @@ RUN dotnet publish "SimpleStore.Admin/SimpleStore.Admin.csproj" -c Release -o /a
 FROM base AS final
 WORKDIR /app
 
-ENV API__Endpoint=""
-ENV API__Key=""
-ENV OpenId__Authority=""
-ENV OpenId__ClientId=""
-ENV OpenId__ClientSecret=""
+# Just a prettier version of the .net env variables below
+# Could also use _FILE env variables for secrets.
+ENV API_KEY=""
+ENV REALM=""
+ENV CLIENT_ID=""
+ENV CLIENT_SECRET=""
+
+ENV apikey=$API_KEY
+ENV Authentication__OpenIdConnect__Realm=$REALM
+ENV Authentication__OpenIdConnect__ClientId=$CLIENT_ID
+ENV Authentication__OpenIdConnect__ClientSecret=$CLIENT_SECRET
 
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "SimpleStore.Admin.dll"]
