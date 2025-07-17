@@ -4,8 +4,8 @@
     container_name: simple-object-store
     #image: sedrad/simplestore:latest
     build:
-      context: ./SimpleStore
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: SimpleStore/Dockerfile
     volumes:
       - ./data:/data
     ports:
@@ -19,8 +19,8 @@
     volumes:
       - ./keys:/root/.aspnet/DataProtection-Keys
     build:
-      context: ./SimpleStore.Admin
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: SimpleStore.Admin/Dockerfile
     environment:
       - API__Endpoint=${API_ENDPOINT}
       - API__Key=${API_KEY}
