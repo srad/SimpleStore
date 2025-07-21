@@ -33,4 +33,11 @@ ENV DB_PATH=/data/data.db
 RUN mkdir -p $STORAGE_DIRECTORY
 
 COPY --from=publish /app/publish .
+
+ENV OPENID_AUTHORITY=""
+ENV OPENID_META_ADDRESS=""
+
+ENV JwtSettings__Authority=$OPENID_AUTHORITY
+ENV JwtSettings__MetadataAddress=$OPENID_META_ADDRESS
+
 ENTRYPOINT ["dotnet", "SimpleStore.dll"]
