@@ -6,6 +6,8 @@ var username = builder.AddParameter("keycloak-username");
 var password = builder.AddParameter("keycloak-password", secret: true);
 var clientSecret = builder.AddParameter("client-secret", secret: true);
 
+// You need to generate a new client-secret and copy it to the appsettings when importing the realm-export for
+// the first time. Because Keycloak does not export secret data.
 var keycloak = builder.AddKeycloak("keycloak", adminUsername: username, adminPassword: password)
     .WithDataVolume()
     .WithRealmImport("../Resources/realm-export.json");
@@ -23,7 +25,6 @@ var frontend = builder.AddProject<SimpleStore_Admin>("frontend", launchProfileNa
     .WithExternalHttpEndpoints()
     .WithReference(keycloak)
     .WithReference(api)
-    .WaitFor(api)
-    .WaitFor(keycloak);
+    .WaitFor(api);
 
 builder.Build().Run();
