@@ -1,12 +1,11 @@
 {
-  "API": {
-    "Endpoint": "",
-    "Key": ""
-  },
-  "OpenId": {
-    "Authority": "",
-    "ClientId": "",
-    "ClientSecret": ""
+  "apikey": "-a",
+  "Authentication": {
+    "OpenIdConnect": {
+      "Realm": "Test",
+      "ClientId": "simplestore-admin",
+      "ClientSecret": ""
+    }
   },
   "DetailedErrors": true,
   "Logging": {

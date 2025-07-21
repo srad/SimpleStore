@@ -39,6 +39,7 @@ WORKDIR /app
 # Could also use _FILE env variables for secrets.
 ENV API_KEY=""
 ENV REALM=""
+ENV OPEN_ID_ENDPOINT=""
 ENV CLIENT_ID=""
 ENV CLIENT_SECRET=""
 
@@ -46,6 +47,7 @@ ENV apikey=$API_KEY
 ENV Authentication__OpenIdConnect__Realm=$REALM
 ENV Authentication__OpenIdConnect__ClientId=$CLIENT_ID
 ENV Authentication__OpenIdConnect__ClientSecret=$CLIENT_SECRET
+ENV Services__keycloak__https=$OPEN_ID_ENDPOINT
 
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "SimpleStore.Admin.dll"]
+ENTRYPOINT ["dotnet", "SimpleStore.Admin.dll"] 
