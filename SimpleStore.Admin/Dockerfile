@@ -52,4 +52,4 @@ ENV Services__keycloak__https=$OPEN_ID_ENDPOINT
 ENV Services__api__https=$API_ENDPOINT
 
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "SimpleStore.Admin.dll"] 
+ENTRYPOINT ["dotnet", "SimpleStore.Admin.dll"]

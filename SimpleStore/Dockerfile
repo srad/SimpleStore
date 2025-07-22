@@ -38,7 +38,7 @@ ENV REALM=""
 
 ENV OPENID_AUTHORITY=""
 ENV OPENID_META_ADDRESS=""
-ENV Realm=$Realm
+ENV Realm=$REALM
 
 ENV JwtSettings__Authority=$OPENID_AUTHORITY
 ENV JwtSettings__MetadataAddress=$OPENID_META_ADDRESS
