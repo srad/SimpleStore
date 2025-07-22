@@ -45,7 +45,7 @@ builder.Services.AddAuthentication(options =>
     })
     .AddKeycloakOpenIdConnect(
         serviceName: "keycloak",
-        realm: builder.Configuration["Authentication:OpenIdConnect:Realm"] ?? throw new InvalidOperationException("No Realm configured"),
+        realm: builder.Configuration["Authentication__OpenIdConnect__Realm"] ?? throw new InvalidOperationException("No Realm configured"),
         options =>
         {
             options.NonceCookie.SecurePolicy = CookieSecurePolicy.Always;
@@ -53,8 +53,8 @@ builder.Services.AddAuthentication(options =>
             options.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             options.AccessDeniedPath = "/access-denied";
             options.SignedOutRedirectUri = "/signed-out";
-            options.ClientId = builder.Configuration["Authentication:OpenIdConnect:ClientId"];
-            options.ClientSecret = builder.Configuration["Authentication:OpenIdConnect:ClientSecret"];
+            options.ClientId = builder.Configuration["Authentication__OpenIdConnect__ClientId"];
+            options.ClientSecret = builder.Configuration["Authentication__OpenIdConnect__ClientSecret"];
             options.ResponseType = "code";
             options.SaveTokens = true;
 

@@ -34,8 +34,11 @@ RUN mkdir -p $STORAGE_DIRECTORY
 
 COPY --from=publish /app/publish .
 
+ENV REALM=""
+
 ENV OPENID_AUTHORITY=""
 ENV OPENID_META_ADDRESS=""
+ENV Realm=$Realm
 
 ENV JwtSettings__Authority=$OPENID_AUTHORITY
 ENV JwtSettings__MetadataAddress=$OPENID_META_ADDRESS

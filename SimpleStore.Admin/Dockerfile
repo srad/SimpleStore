@@ -42,12 +42,14 @@ ENV REALM=""
 ENV OPEN_ID_ENDPOINT=""
 ENV CLIENT_ID=""
 ENV CLIENT_SECRET=""
+ENV API_ENDPOINT=""
 
 ENV apikey=$API_KEY
 ENV Authentication__OpenIdConnect__Realm=$REALM
 ENV Authentication__OpenIdConnect__ClientId=$CLIENT_ID
 ENV Authentication__OpenIdConnect__ClientSecret=$CLIENT_SECRET
 ENV Services__keycloak__https=$OPEN_ID_ENDPOINT
+ENV Services__api__https=$API_ENDPOINT
 
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "SimpleStore.Admin.dll"] 
