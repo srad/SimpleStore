@@ -55,5 +55,9 @@ ENV Authentication__OpenIdConnect__Realm=""
 ENV Authentication__OpenIdConnect__ClientId=""
 ENV Authentication__OpenIdConnect__ClientSecret=""
 
+ENV keycloak__service__host=""
+ENV keycloak__service__port=""
+ENV keycloak__service__url=""
+
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "SimpleStore.Admin.dll"]
