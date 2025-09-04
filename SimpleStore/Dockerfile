@@ -25,6 +25,8 @@ RUN dotnet build "SimpleStore/SimpleStore.csproj" -c Release -o /app/build -a $T
 FROM build AS publish
 RUN dotnet publish "SimpleStore/SimpleStore.csproj" -c Release -o /app/publish /p:UseAppHost=false -a $TARGETARCH
 
+ENV ASPNETCORE_URLS=http://+:80
+
 FROM base AS final
 WORKDIR /app
 
