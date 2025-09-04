@@ -51,5 +51,9 @@ ENV Authentication__OpenIdConnect__ClientSecret=$CLIENT_SECRET
 ENV Services__keycloak__https=$OPEN_ID_ENDPOINT
 ENV Services__api__https=$API_ENDPOINT
 
+ENV Authentication__OpenIdConnect__Realm=""
+ENV Authentication__OpenIdConnect__ClientId=""
+ENV Authentication__OpenIdConnect__ClientSecret=""
+
 COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "SimpleStore.Admin.dll"]
